@@ -2,7 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Always initialize GoogleGenAI with process.env.API_KEY directly within the named parameters object.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 export const getGeminiResponse = async (prompt: string, contactName: string) => {
   try {
