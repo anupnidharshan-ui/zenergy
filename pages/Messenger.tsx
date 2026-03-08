@@ -9,6 +9,7 @@ import { collection, query, where, orderBy, onSnapshot } from "firebase/firestor
 import { db, auth, } from "../firebase";
 import { doc, getDocs, getDoc } from "firebase/firestore";
 
+
 const Messenger: React.FC = () => {
   const [activeSidebarItem, setActiveSidebarItem] = useState('messages');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +36,8 @@ const handleStartChat = (contact: Contact) => {
       id: chatId,
       participants: [contact],
       messages: [],
-      unreadCount: 0
+      unreadCount: 0,
+      type: "primary"
     };
 
     setChats(prev => [newChat, ...prev]);
@@ -76,11 +78,12 @@ useEffect(() => {
           id: otherUserId,
           name: userData.username ?? "Unknown",
           handle: userData.username ? `@${userData.username}` : "",
-          avatar: userData.photoURL ?? "/default-avatar.png",
+          avatar: userData.avatarUrl ?? "/default-avatar.png",
           status: "online"
         }],
         messages: [],
         unreadCount: 0,
+        type:"primary",
         lastMessage: data.lastMessage || "",
         lastMessageAt: data.lastMessageAt || null
       });
