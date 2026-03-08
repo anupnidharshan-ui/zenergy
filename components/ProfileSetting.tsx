@@ -159,12 +159,12 @@ if (loading || !profile) {
     const userRef = doc(db, "users", user.uid);
 
     //  Update Firestore
-    await updateDoc(userRef, {
-      displayName: profile.displayName,
-      username: profile.username,
-      website: profile.website,
-      bio: profile.bio,
-    });
+  await updateDoc(userRef, {
+  displayName: profile.displayName ?? "",
+  username: profile.username ?? "",
+  website: profile.website ?? "",
+  bio: profile.bio ?? "",
+});
 
     // Update Firebase Auth name
     await updateProfile(user, {
@@ -210,7 +210,7 @@ if (loading || !profile) {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-xl">link</span>
               <input 
                 name="website"
-                value={profile.website}
+                value={profile.website || ""}
                 onChange={handleChange}
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl settings-input-glass text-white font-medium" 
                 placeholder="https://yourwebsite.com" 
