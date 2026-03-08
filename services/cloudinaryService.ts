@@ -3,6 +3,9 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+  console.log("Cloud Name:", cloudName);
+  console.log("Upload Preset:", uploadPreset);
+
   const isVideo = file.type.startsWith("video");
 
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/${isVideo ? "video" : "image"}/upload`;
