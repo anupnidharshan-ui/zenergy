@@ -23,7 +23,10 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 }) => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [requestSent, setRequestSent] = useState<string | null>(null);
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const q =
@@ -62,6 +65,16 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     return () => unsubscribe();
   }, [profileId, type]);
 
+  const handleFollow = (userId: string) => {
+  // later firebase follow request logic comes here
+
+  setRequestSent(userId);
+
+  setTimeout(() => {
+    setRequestSent(null);
+  }, 2000);
+};
+
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60"
@@ -83,28 +96,47 @@ onClick={(e) => e.stopPropagation()}
               No users found
             </div>
           ) : (
-            users.map((user) => (
+users.map((user) => (
   <div
     key={user.id}
-    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-800/70 transition-all duration-200 cursor-pointer"
-    onClick={() => {
-      navigate(`/profile/${user.id}`);
-      onClose(); // closes modal after clicking
-    }}
+    className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-zinc-800/70 transition-all duration-200"
   >
-                <img
-                  src={user.avatarUrl || "https://via.placeholder.com/100"}
-                  alt={user.username}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-medium text-sm">{user.username}</p>
-                  <p className="text-xs text-gray-500">{user.name}</p>
-                </div>
-              </div>
-            ))
+    <div
+      className="flex items-center gap-3 cursor-pointer"
+      onClick={() => {
+        navigate(`/profile/${user.id}`);
+        onClose();
+      }}
+    >
+      <img
+        src={user.avatarUrl || "https://via.placeholder.com/100"}
+        className="w-10 h-10 rounded-full object-cover"
+      />
+      <div>
+        <p className="font-medium text-sm">{user.username}</p>
+        <p className="text-xs text-gray-500">{user.name}</p>
+      </div>
+    </div>
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleFollow(user.id);
+      }}
+      className="text-xs bg-blue-500 px-3 py-1 rounded-lg"
+    >
+      Follow
+    </button>
+  </div>
+))
+
           )}
         </div>
+        {requestSent && (
+  <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[9999]">
+    Request Sent
+  </div>
+)}
       </div>
     </div>
   );

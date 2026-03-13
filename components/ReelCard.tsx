@@ -71,7 +71,7 @@ const handleDeletePost = async () => {
 
     <div className="size-12 rounded-full p-[2px] bg-white/20 backdrop-blur-md">
       <img
-        src={getAvatar(post.avatarUrl, post.username)}
+        src={getAvatar(post.avatarUrl , post.username)}
         alt={post.username}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src =
