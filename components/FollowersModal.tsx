@@ -14,16 +14,18 @@ interface FollowersModalProps {
   profileId: string;
   type: "followers" | "following";
   onClose: () => void;
+    onFollow: (userId: string) => void;
+
 }
 
 const FollowersModal: React.FC<FollowersModalProps> = ({
   profileId,
   type,
   onClose,
+  onFollow,
 }) => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [requestSent, setRequestSent] = useState<string | null>(null);
   const navigate = useNavigate();
 
 
@@ -65,15 +67,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     return () => unsubscribe();
   }, [profileId, type]);
 
-  const handleFollow = (userId: string) => {
-  // later firebase follow request logic comes here
-
-  setRequestSent(userId);
-
-  setTimeout(() => {
-    setRequestSent(null);
-  }, 2000);
-};
+  
 
   return (
     <>
@@ -121,9 +115,9 @@ users.map((user) => (
 
     <button
       onClick={(e) => {
-        e.stopPropagation();
-        handleFollow(user.id);
-      }}
+  e.stopPropagation();
+  onFollow(user.id);
+}}
       className="text-xs bg-blue-500 px-3 py-1 rounded-lg"
     >
       Follow
@@ -136,11 +130,7 @@ users.map((user) => (
        
       </div>
     </div>
-     {requestSent && (
-  <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[9999]">
-    Request Sent
-  </div>
-)}
+ 
     </>
   );
 };

@@ -36,7 +36,7 @@
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [followRequests, setFollowRequests] = useState<any[]>([]);
   const [showRequests, setShowRequests] = useState(false);
-  const [requestSent, setRequestSent] = useState(false);
+const [showToast, setShowToast] = useState(false);
    
     const { uid } = useParams();
 
@@ -112,23 +112,20 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
 
     const unsubscribe = onSnapshot(followRef, (snap) => {
 
-    if (!snap.exists()) {
-      setIsFollowing(false);
-      setRequestSent(false);
-      return;
-    }
+  if (!snap.exists()) {
+  setIsFollowing(false);
+  return;
+}
 
-    const data = snap.data();
+const data = snap.data();
 
-    if (data.status === "accepted") {
-      setIsFollowing(true);
-      setRequestSent(false);
-    }
+if (data.status === "accepted") {
+  setIsFollowing(true);
+}
 
-    if (data.status === "pending") {
-      setIsFollowing(false);
-      setRequestSent(true);
-    }
+if (data.status === "pending") {
+  setIsFollowing(false);
+}
 
   });
 
@@ -216,6 +213,36 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
   const shouldHideProfile =
     isPrivate && !isOwnProfile && !isFollower;
 
+    const handleFollowFromModal = async (userId: string) => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return;
+
+  const followId = `${currentUser.uid}_${userId}`;
+  const followRef = doc(db, "followers", followId);
+
+  const userDoc = await getDoc(doc(db, "users", userId));
+  const accountType = userDoc.data()?.accountType;
+
+  if (accountType === "private") {
+    await setDoc(followRef, {
+      followerId: currentUser.uid,
+      followingId: userId,
+      status: "pending",
+      createdAt: new Date(),
+    });
+  } else {
+    await setDoc(followRef, {
+      followerId: currentUser.uid,
+      followingId: userId,
+      status: "accepted",
+      createdAt: new Date(),
+    });
+  }
+
+ setShowToast(true);
+setTimeout(() => setShowToast(false), 2000);
+};
+
     
 
     return (
@@ -234,13 +261,13 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
             onFollowersClick={() => setShowFollowers(true)}
             onFollowingClick={() => setShowFollowing(true)}
             onFollowToggle={async () => {
-              const currentUser = auth.currentUser;
-              if (!currentUser || !profile?.id) return;
+  const currentUser = auth.currentUser;
+  if (!currentUser || !profile?.id) return;
 
-              const followId = `${currentUser.uid}_${profile.id}`;
-              const followRef = doc(db, "followers", followId);
+  const followId = `${currentUser.uid}_${profile.id}`;
+  const followRef = doc(db, "followers", followId);
 
-            if (isFollowing) {
+  if (isFollowing) {
     await deleteDoc(followRef);
   } else {
 
@@ -260,8 +287,10 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
       });
     }
 
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
   }
-            }}
+}}
             onOpenVibeTool={() => setShowVibeTool(true)}
           />
 
@@ -344,21 +373,23 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
           />
         )}
 
-        {showFollowers && (
-          <FollowersModal
-            profileId={profile.id}
-            type="followers"
-            onClose={() => setShowFollowers(false)}
-          />
-        )}
+      {showFollowers && (
+  <FollowersModal
+    profileId={profile.id}
+    type="followers"
+    onClose={() => setShowFollowers(false)}
+    onFollow={handleFollowFromModal}
+  />
+)}
 
-        {showFollowing && (
-          <FollowersModal
-            profileId={profile.id}
-            type="following"
-            onClose={() => setShowFollowing(false)}
-          />
-        )}
+       {showFollowing && (
+  <FollowersModal
+    profileId={profile.id}
+    type="following"
+    onClose={() => setShowFollowing(false)}
+    onFollow={handleFollowFromModal}
+  />
+)}
 
         {selectedPost && (
     <PostModal
@@ -390,7 +421,7 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
 
         <img
   src={user.avatarUrl || "/default-avatar.png"}
-  className="w-full h-full object-cover"
+  className="w-10 h-10 rounded-full object-cover"
 />
 
         <span className="font-medium">
@@ -443,7 +474,11 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
       </div>
     </div>
   )}
-
+{showToast && (
+    <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[10000]">
+    Request Sent
+  </div>
+)}
       </div>
     );
   };
