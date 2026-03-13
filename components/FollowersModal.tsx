@@ -76,6 +76,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 };
 
   return (
+    <>
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60"
       onClick={onClose}
@@ -132,13 +133,15 @@ users.map((user) => (
 
           )}
         </div>
-        {requestSent && (
+       
+      </div>
+    </div>
+     {requestSent && (
   <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[9999]">
     Request Sent
   </div>
 )}
-      </div>
-    </div>
+    </>
   );
 };
 
