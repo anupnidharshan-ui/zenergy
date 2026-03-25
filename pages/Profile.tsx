@@ -37,38 +37,33 @@
     const [followRequests, setFollowRequests] = useState<any[]>([]);
   const [showRequests, setShowRequests] = useState(false);
 const [showToast, setShowToast] = useState(false);
+const [currentUser, setCurrentUser] = useState<any>(null);
+const [authReady, setAuthReady] = useState(false);
    
     const { uid } = useParams();
 
       const imagePosts = userPosts.filter(post => post.imageUrl);
 const reelPosts = userPosts.filter(post => post.videoUrl);
-    const currentUser = auth.currentUser;
-    const isOwnProfile = currentUser?.uid === profile?.id;
+const isOwnProfile = currentUser?.uid === profile?.id;
     /* ================= PROFILE LOADING ================= */
 
-    useEffect(() => {
-      const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-        if (!user) return;
+ useEffect(() => {
+  if (!uid) return;
 
-        const profileUid = uid || user.uid;
+  const unsubscribeSnap = onSnapshot(
+    doc(db, "users", uid),
+    (snap) => {
+      if (snap.exists()) {
+        setProfile({
+          id: snap.id,
+          ...(snap.data() as Omit<UserProfile, "id">),
+        });
+      }
+    }
+  );
 
-        const unsubscribeSnap = onSnapshot(
-          doc(db, "users", profileUid),
-          (snap) => {
-            if (snap.exists()) {
-              setProfile({
-                id: snap.id,
-                ...(snap.data() as Omit<UserProfile, "id">),
-              });
-            }
-          }
-        );
-
-        return () => unsubscribeSnap();
-      });
-
-      return () => unsubscribeAuth();
-    }, [uid]);
+  return () => unsubscribeSnap();
+}, [uid]);
 
 
   /* ================= USER POSTS (REAL DATA) ================= */
@@ -104,33 +99,36 @@ const reelPosts = userPosts.filter(post => post.videoUrl);
   /* ================= FOLLOW STATE ================= */
 
     useEffect(() => {
-      const currentUser = auth.currentUser;
-      if (!currentUser || !profile?.id) return;
+  if (!currentUser || !profile?.id) return;
 
-      const followId = `${currentUser.uid}_${profile.id}`;
-      const followRef = doc(db, "followers", followId);
+  const followId = `${currentUser.uid}_${profile.id}`;
+  const followRef = doc(db, "followers", followId);
 
-    const unsubscribe = onSnapshot(followRef, (snap) => {
+  const unsubscribe = onSnapshot(followRef, (snap) => {
+    if (!snap.exists()) {
+      setIsFollowing(false);
+      return;
+    }
 
-  if (!snap.exists()) {
-  setIsFollowing(false);
-  return;
-}
+    const data = snap.data();
 
-const data = snap.data();
-
-if (data.status === "accepted") {
-  setIsFollowing(true);
-}
-
-if (data.status === "pending") {
-  setIsFollowing(false);
-}
-
+    if (data.status === "accepted") {
+      setIsFollowing(true);
+    } else {
+      setIsFollowing(false);
+    }
   });
 
-      return () => unsubscribe();
-    }, [profile]);
+  return () => unsubscribe();
+}, [currentUser, profile]);
+
+useEffect(() => {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    setCurrentUser(user);
+  });
+
+  return () => unsub();
+}, []);
 
     /* ================= FOLLOW COUNTS ================= */
 
@@ -167,35 +165,33 @@ if (data.status === "pending") {
 
     // follow request 
     useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    const q = query(
-      collection(db, "followers"),
-      where("followingId", "==", currentUser.uid),
-      where("status", "==", "pending")
-    );
-
-  const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const requests = await Promise.all(
-    snapshot.docs.map(async (docSnap) => {
-      const data = docSnap.data();
-
-      const userDoc = await getDoc(doc(db, "users", data.followerId));
-
-      return {
-  requestId: docSnap.id,   // followers document id
-  followerId: data.followerId,
-  user: userDoc.data()
-};
-    })
+  const q = query(
+    collection(db, "followers"),
+    where("followingId", "==", currentUser.uid),
+    where("status", "==", "pending")
   );
 
-      setFollowRequests(requests);
-    });
+  const unsubscribe = onSnapshot(q, async (snapshot) => {
+    const requests = await Promise.all(
+      snapshot.docs.map(async (docSnap) => {
+        const data = docSnap.data();
+        const userDoc = await getDoc(doc(db, "users", data.followerId));
 
-    return () => unsubscribe();
-  }, []);
+        return {
+          requestId: docSnap.id,
+          followerId: data.followerId,
+          user: userDoc.data(),
+        };
+      })
+    );
+
+    setFollowRequests(requests);
+  });
+
+  return () => unsubscribe();
+}, [currentUser]);
 
     if (!profile) {
       return (

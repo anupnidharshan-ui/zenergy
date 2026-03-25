@@ -17,16 +17,16 @@ const StorySection: React.FC<StorySectionProps> = ({ currentVibe, profiles }) =>
       <div className="flex gap-5 overflow-x-auto pb-6 pt-2 px-2">
 
         {profiles.map((profile) => {
-  console.log("PROFILE DATA:", profile);   // 👈 add this
+  console.log("PROFILE DATA:", profile);   
   const creatorVibe = VIBES[profile.currentVibe];
-  const avatar = profile.avatarUrl || profile.photoURL;
+  const avatar = profile.photoURL || profile.avatarUrl;
 
           return (
             <div
               key={profile.id}
               className="flex flex-col items-center gap-2.5 flex-shrink-0 cursor-pointer group"
               onClick={() => {
-  console.log("CLICKED PROFILE:", profile);   // 👈 add this
+  console.log("CLICKED PROFILE:", profile);  
   setSelectedProfile({
     avatar: profile.avatarUrl || profile.photoURL,
     username: profile.username,
