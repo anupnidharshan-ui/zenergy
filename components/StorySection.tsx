@@ -19,8 +19,11 @@ const StorySection: React.FC<StorySectionProps> = ({ currentVibe, profiles }) =>
         {profiles.map((profile) => {
   console.log("PROFILE DATA:", profile);   
   const creatorVibe = VIBES[profile.currentVibe];
-  const avatar = profile.photoURL || profile.avatarUrl;
-
+const avatar =
+  profile.avatarUrl || profile.photoUrl||
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    profile.username
+  )}&background=111827&color=fff&bold=true`;
           return (
             <div
               key={profile.id}
@@ -28,7 +31,7 @@ const StorySection: React.FC<StorySectionProps> = ({ currentVibe, profiles }) =>
               onClick={() => {
   console.log("CLICKED PROFILE:", profile);  
   setSelectedProfile({
-    avatar: profile.avatarUrl || profile.photoURL,
+  avatar: profile.photoURL || profile.avatarUrl,
     username: profile.username,
   });
 }}
@@ -79,9 +82,14 @@ const StorySection: React.FC<StorySectionProps> = ({ currentVibe, profiles }) =>
       className="flex flex-col items-center"
       onClick={(e) => e.stopPropagation()}
     >
-      <img
-        src={selectedProfile.avatar}
-        alt={selectedProfile.username}
+    <img
+  src={
+    selectedProfile.avatarUrl || selectedProfile.photoUrl || 
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      selectedProfile.username
+    )}`
+  }
+
         className="w-64 h-64 rounded-full object-cover border-4 border-white/20 shadow-2xl"
       />
 

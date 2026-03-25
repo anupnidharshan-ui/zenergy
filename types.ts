@@ -70,12 +70,12 @@ export interface Session {
 export interface UserProfile1 {
   username: string;
   name: string;
-  avatarUrl: string;      // ✅ ADD THIS
+  avatarUrl: string;      
   postsCount: number;
   followersCount: string;
-  followingCount: number; // ✅ ADD THIS
-  bio: string;            // ✅ ADD THIS
-  vibe: string;           // ✅ ADD THIS
+  followingCount: number; 
+  bio: string;            
+  vibe: string;          
   link: string;   
 }
 
