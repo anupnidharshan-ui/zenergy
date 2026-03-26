@@ -21,7 +21,7 @@
   import Sidebar from '../components/Sidebar';
   import FollowersModal from '../components/FollowersModal';
   import { Post, TabType, UserProfile } from '../types';
-  import { PostModal } from '@/components/PostModal';
+import { PostModal } from '../components/PostModal';
 
   const Profile: React.FC = () => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
