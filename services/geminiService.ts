@@ -34,3 +34,6 @@ export async function analyzeUserVibe(bio: string): Promise<string> {
     return "Cyber Mystic with glowing aura ✨";
   }
 }
+export async function generateReelVibe(desc: string) {
+  return "Neon Pulse";
+}
