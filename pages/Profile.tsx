@@ -21,7 +21,7 @@
   import Sidebar from '../components/Sidebar';
   import FollowersModal from '../components/FollowersModal';
   import { Post, TabType, UserProfile } from '../types';
-import { PostModal } from '../components/PostModal';
+import PostModal  from '../components/PostModal';
 
   const Profile: React.FC = () => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -365,7 +365,10 @@ setTimeout(() => setShowToast(false), 2000);
           <VibeGenerator
             currentBio={profile.bio}
             onClose={() => setShowVibeTool(false)}
-            onUpdate={() => {}}
+            onUpdate={(bio, vibe) => {
+  setProfile(prev => prev ? { ...prev, bio, vibe } : prev);
+  setShowVibeTool(false);
+}}
           />
         )}
 

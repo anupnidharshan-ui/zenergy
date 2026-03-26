@@ -232,3 +232,4 @@ const handleComment = async () => {
     </div>
   );
 };
+export default PostModal;
