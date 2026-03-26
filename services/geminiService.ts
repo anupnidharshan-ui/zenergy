@@ -54,8 +54,7 @@ export async function generateAIEnhancedHashtags(description: string): Promise<s
 }
 
 export const getVibeSuggestions = async (query: string) => {
-  if (!process.env.API_KEY || !query) return [];
-
+if (!import.meta.env.VITE_GEMINI_API_KEY || !query) return [];
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -78,3 +77,19 @@ export const getVibeSuggestions = async (query: string) => {
     return [];
   }
 };
+
+export async function analyzeUserVibe(bio: string): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Analyze this user's bio and generate a short cool cyberpunk vibe description in one line: "${bio}"`,
+    });
+
+    return response.text || "Neon Soul Explorer ⚡";
+  } catch (error) {
+    console.error("Vibe Analyze Error:", error);
+
+    // DEMO SAFE FALLBACK
+    return "Cyber Mystic with futuristic digital aura ✨";
+  }
+}
