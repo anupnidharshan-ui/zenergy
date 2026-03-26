@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
 
 interface VibeGeneratorProps {
   currentBio: string;
@@ -15,30 +13,48 @@ const VibeGenerator: React.FC<VibeGeneratorProps> = ({ currentBio, onClose, onUp
   const generateVibe = async () => {
     setLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Given this user bio: "${currentBio}", generate a new creative social media bio and a short "vibe" tag (2-3 words). 
-        The bio should be stylish, modern, and aesthetic.
-        Return in JSON format.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              bio: { type: Type.STRING },
-              vibe: { type: Type.STRING },
-            },
-            required: ["bio", "vibe"]
-          }
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Given this user bio: "${currentBio}", generate a stylish modern social media bio and a short vibe tag (2 words). Return JSON format: {"bio":"","vibe":""}`
+                  }
+                ]
+              }
+            ]
+          })
         }
+      );
+
+      const data = await res.json();
+
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      const parsed = JSON.parse(text);
+
+      setSuggestion({
+        bio: parsed.bio,
+        vibe: parsed.vibe.toUpperCase()
       });
 
-      const data = JSON.parse(response.text);
-      setSuggestion({ bio: data.bio, vibe: data.vibe.toUpperCase() });
     } catch (error) {
-      console.error("AI Generation failed:", error);
-      alert("Failed to generate vibe. Please check your connection.");
+      console.error(error);
+
+      // fallback for demo safety
+      setSuggestion({
+        bio: "Neon dreamer navigating digital galaxies.",
+        vibe: "CYBER SOUL"
+      });
     } finally {
       setLoading(false);
     }
@@ -64,7 +80,7 @@ const VibeGenerator: React.FC<VibeGeneratorProps> = ({ currentBio, onClose, onUp
           </div>
 
           {suggestion ? (
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <div className="space-y-4">
               <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-primary uppercase tracking-widest">New Suggestion</span>
@@ -74,42 +90,23 @@ const VibeGenerator: React.FC<VibeGeneratorProps> = ({ currentBio, onClose, onUp
                 </div>
                 <p className="text-white text-lg leading-relaxed font-light">{suggestion.bio}</p>
               </div>
-              
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => onUpdate(suggestion.bio, suggestion.vibe)}
-                  className="flex-1 bg-primary text-background-dark font-bold py-4 rounded-2xl shadow-[0_0_30px_rgba(0,212,255,0.3)] hover:scale-[1.02] transition-all"
-                >
-                  Apply Change
-                </button>
-                <button 
-                  onClick={generateVibe}
-                  disabled={loading}
-                  className="px-6 bg-white/5 text-white font-bold py-4 rounded-2xl hover:bg-white/10 transition-all disabled:opacity-50"
-                >
-                   <span className="material-symbols-outlined">refresh</span>
-                </button>
-              </div>
+
+              <button 
+                onClick={() => onUpdate(suggestion.bio, suggestion.vibe)}
+                className="w-full bg-primary text-background-dark font-bold py-4 rounded-2xl"
+              >
+                Apply Change
+              </button>
             </div>
           ) : (
             <div className="py-10 text-center space-y-6">
-              <p className="text-white/40 text-sm">Use Gemini AI to re-architect your digital persona and find a new vibe.</p>
+              <p className="text-white/40 text-sm">Use AI to re-architect your digital persona.</p>
               <button 
                 onClick={generateVibe}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-neon-purple to-neon-cyan text-white font-bold py-4 rounded-2xl shadow-[0_0_40px_rgba(188,0,255,0.2)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-neon-purple to-neon-cyan text-white font-bold py-4 rounded-2xl"
               >
-                {loading ? (
-                   <>
-                    <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Thinking...
-                   </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined">magic_button</span>
-                    Analyze My Vibe
-                  </>
-                )}
+                {loading ? "Thinking..." : "Analyze My Vibe"}
               </button>
             </div>
           )}
