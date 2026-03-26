@@ -37,3 +37,7 @@ export async function analyzeUserVibe(bio: string): Promise<string> {
 export async function generateReelVibe(desc: string) {
   return "Neon Pulse";
 }
+
+export async function getVibeSuggestions(query: string): Promise<string[]> {
+  return ["Cyber Chill", "Neon Energy", "Digital Aura", "Vibe Flow", "Future Mood"];
+}
